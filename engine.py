@@ -51,6 +51,9 @@ class Engine:
 
         return {entity: {prop: self._components[prop][entity] for prop in req_props} for entity in matching_entities}
 
+    # TODO: update_component
+    # TODO: get_component
+
     def _run_systems(self):
         for system in self._systems:
             system.run()

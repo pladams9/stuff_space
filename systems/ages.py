@@ -6,6 +6,7 @@ class AgeSystem(System):
         super().__init__()
 
     def run(self):
-        entities = self._engine.get_matching_entities(['name', 'age'])
-        for entity, properties in entities.items():
-            print(f"{properties['name']} is {properties['age']} years old.")
+        entities = self._engine.get_matching_entities(['name', 'age', 'output'])
+        for entity, props in entities.items():
+            self._engine._components['output'][entity].append(f"{props['name']} is {props['age']} years old.")
+            # TODO: Remove direct access to components

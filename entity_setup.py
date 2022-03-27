@@ -3,11 +3,13 @@ def setup(engine):
         {
             'name': 'Bob',
             'greeting': 'Howdy there!',
-            'age': 52
+            'age': 52,
+            'output': []
         })
 
     engine.add_entity(
         {
             'name': 'plant',
-            'age': 2
+            'age': 2,
+            'output': []
         })
