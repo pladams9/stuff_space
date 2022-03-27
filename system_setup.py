@@ -1,9 +1,9 @@
 from systems.greetings import GreetingsSystem
-from systems.ages import AgeSystem
 from systems.gui import GUI
+from systems.command_parser import CommandParser
 
 
 def setup(engine):
-    engine.add_system(GUI())
+    engine.add_system(GUI(), ['GUI_OUTPUT'])
     engine.add_system(GreetingsSystem())
-    engine.add_system(AgeSystem())
+    engine.add_system(CommandParser(), ['GUI_COMMAND'])
