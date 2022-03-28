@@ -79,6 +79,14 @@ class Engine:
 
         return tuple(matching_entities)
 
+    def get_entity_components(self, entity_id):
+        return_comps = {}
+        for component, entities in self.components.items():
+            if entity_id in entities:
+                return_comps[component] = self.components[component][entity_id]
+
+        return return_comps
+
     def _run_systems(self):
         for system in self._systems.values():
             system.run()

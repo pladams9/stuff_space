@@ -15,5 +15,8 @@ class GreetingsSystem(System):
             for entity in entities:
                 self._engine.fire_event((
                     'GUI_OUTPUT',
-                    f"[{time.strftime('%H:%M:%S')}] {self._engine.components['name'][entity]} says \"{self._engine.components['greeting'][entity]}\""
+                    (
+                        f"[{time.strftime('%H:%M:%S')}] {self._engine.components['name'][entity]} says \"{self._engine.components['greeting'][entity]}\"",
+                        'text'
+                    )
                 ))

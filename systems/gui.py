@@ -30,13 +30,13 @@ class GUI(System):
             wrap='word'
         )
         self._terminal.grid(column=0, row=0, sticky='nesw')
-
-        def prevent_editing(e):
-            if e.state == 4 and e.keysym == 'c':
-                return None
-            else:
-                return 'break'
-        self._terminal.bind("<Key>", prevent_editing)
+        self._terminal.tag_configure('text', foreground='#AAA')
+        self._terminal.tag_configure('highlight', foreground="#67F")
+        self._terminal.tag_configure('command', foreground='#FFF')
+        self._terminal.tag_configure('error', foreground='#00F')
+        self._terminal.tag_configure('critical', background='#00F', foreground="#FFF")
+        self._terminal.tag_configure('sel', background='#44A', foreground="#CCC")
+        self._terminal.tag_raise('sel')
 
         # Terminal Scrollbar
         self._scrollbar = tk.Scrollbar()
@@ -60,13 +60,24 @@ class GUI(System):
         self._cmd_line.bind('<Return>', self._submit_cmd)
         self._cmd_line.focus()
 
+        def terminal_type(e):
+            if e.state == 4 and e.keysym == 'c':
+                return None
+            else:
+                self._cmd_line.focus()
+                if len(e.keysym) == 1:
+                    self._cmd_line.event_generate(e.keysym)
+                return 'break'
+
+        self._terminal.bind("<Key>", terminal_type)
+
     def run(self):
         cur_scroll_end = self._terminal.yview()[1]
 
         while not self.events.empty():
             e = self.events.get()
             if e[0] == 'GUI_OUTPUT':
-                self._terminal.insert('end', e[1])
+                self._terminal.insert('end', e[1][0], e[1][1])
                 self._terminal.insert('end', '\n')
 
         if cur_scroll_end == 1.0:
@@ -74,7 +85,7 @@ class GUI(System):
 
         self._window.update()
 
-    def _submit_cmd(self, e):
+    def _submit_cmd(self, _e):
         self._engine.fire_event(('GUI_COMMAND', self._cmd_line.get()))
         self._cmd_line.delete(0, 'end')
 
