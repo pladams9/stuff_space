@@ -18,6 +18,9 @@ class Engine:
         self.FAST_TICK = 1
         self.SLOW_TICK = 2
         self.SLOW_TICK_LENGTH = 1.0 / 30.0
+            # TODO: Get rid of this slow tick and just let systems all determine their time per second?
+            # TODO: Or don't remove it because we want to couple logic on a single time step?
+            # TODO: Perhaps we should just redefine some ticks: EVERY_TICK, LOGIC_TICK, GUI_TICK
 
         self._systems = {}
         self._systems_by_tick_speed = {
@@ -62,6 +65,10 @@ class Engine:
             if c not in self.components:
                 self.components[c] = {}
             self.components[c][new_id] = v
+
+    def remove_entity(self, entity_id):
+        for component in self.components:
+            self.components[component].pop(entity_id, None)
 
     def add_system(self, system, listening_to=None, tick_wait=0):
         system._engine = self
@@ -134,3 +141,5 @@ class Engine:
     def _handle_system_command(self, e):
         if e[1] == 'shutdown':
             self.shutdown()
+        elif e[1][0] == 'set_tick_length':
+            self.SLOW_TICK_LENGTH = e[1][1]

@@ -1,6 +1,7 @@
 from engine import System
 import tkinter as tk
 import tkinter.font as tkfont
+import time
 
 
 class GUI(System):
@@ -8,6 +9,8 @@ class GUI(System):
         super().__init__()
 
         # Main Window
+        self._FRAME_LENGTH = 1.0 / 30.0
+        self._time_of_last_frame = time.perf_counter()
         self._window = tk.Tk()
         self._window.geometry('800x400')
         self._window.grid_columnconfigure(0, weight=1)
@@ -80,18 +83,22 @@ class GUI(System):
         self._terminal.bind("<Key>", terminal_type)
 
     def run(self):
-        cur_scroll_end = self._terminal.yview()[1]
+        cur_time = time.perf_counter()
+        if cur_time > self._time_of_last_frame + self._FRAME_LENGTH:
+            self._time_of_last_frame = cur_time
 
-        while not self.events.empty():
-            e = self.events.get()
-            if e[0] == 'GUI_OUTPUT':
-                self._terminal.insert('end', e[1][0], e[1][1])
-                self._terminal.insert('end', '\n')
+            cur_scroll_end = self._terminal.yview()[1]
 
-        if cur_scroll_end == 1.0:
-            self._terminal.yview_moveto(1.0)
+            while not self.events.empty():
+                e = self.events.get()
+                if e[0] == 'GUI_OUTPUT':
+                    self._terminal.insert('end', e[1][0], e[1][1])
+                    self._terminal.insert('end', '\n')
 
-        self._window.update()
+            if cur_scroll_end == 1.0:
+                self._terminal.yview_moveto(1.0)
+
+            self._window.update()  # Processes all outstanding events on this tick
 
     def _submit_cmd(self, _e):
         self._engine.fire_event(('GUI_COMMAND', self._cmd_line.get()))
@@ -116,10 +123,6 @@ class GUI(System):
                 and self._cmd_line_history_pos > 0:
             self._cmd_line_history_pos -= 1
             scrolled = True
-
-        print(e.keysym)
-        print(scrolled)
-        print(self._cmd_line_history_pos)
 
         if scrolled:
             self._cmd_line.delete(0, 'end')
