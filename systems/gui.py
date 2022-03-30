@@ -57,7 +57,15 @@ class GUI(System):
             )
         )
         self._cmd_line.grid(column=0, row=1, columnspan=2, sticky='ew', padx=3, pady=3)
+
+        self._CMD_LINE_MAX_HISTORY = 100
+        self._cmd_line_history = []
+        self._cmd_line_history_pos = -1
+
         self._cmd_line.bind('<Return>', self._submit_cmd)
+        self._cmd_line.bind('<Key-Up>', self._cmd_line_scroll)
+        self._cmd_line.bind('<Key-Down>', self._cmd_line_scroll)
+
         self._cmd_line.focus()
 
         def terminal_type(e):
@@ -87,7 +95,35 @@ class GUI(System):
 
     def _submit_cmd(self, _e):
         self._engine.fire_event(('GUI_COMMAND', self._cmd_line.get()))
+
+        if len(self._cmd_line_history) == 0 or self._cmd_line.get() != self._cmd_line_history[0]:
+            self._cmd_line_history.insert(0, self._cmd_line.get())
+        if len(self._cmd_line_history) > self._CMD_LINE_MAX_HISTORY:
+            self._cmd_line_history.pop()
+        self._cmd_line_history_pos = -1
+
         self._cmd_line.delete(0, 'end')
+
+    def _cmd_line_scroll(self, e):
+        scrolled = False
+        if e.keysym == 'Up' \
+                and len(self._cmd_line_history) > 0 \
+                and self._cmd_line_history_pos < self._CMD_LINE_MAX_HISTORY \
+                and self._cmd_line_history_pos < len(self._cmd_line_history) - 1:
+            self._cmd_line_history_pos += 1
+            scrolled = True
+        elif e.keysym == 'Down' \
+                and self._cmd_line_history_pos > 0:
+            self._cmd_line_history_pos -= 1
+            scrolled = True
+
+        print(e.keysym)
+        print(scrolled)
+        print(self._cmd_line_history_pos)
+
+        if scrolled:
+            self._cmd_line.delete(0, 'end')
+            self._cmd_line.insert(0, self._cmd_line_history[self._cmd_line_history_pos])
 
     def _close(self):
         self._engine.fire_event(('SYSTEM_COMMAND', 'shutdown'))
