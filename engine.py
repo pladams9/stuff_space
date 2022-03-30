@@ -1,6 +1,9 @@
+# IMPORTS
 from queue import SimpleQueue
+import time
 
 
+# CLASSES
 class System:
     def __init__(self):
         self._engine = None
@@ -12,7 +15,16 @@ class System:
 
 class Engine:
     def __init__(self):
+        self.FAST_TICK = 1
+        self.SLOW_TICK = 2
+        self.SLOW_TICK_LENGTH = 1.0 / 30.0
+
         self._systems = {}
+        self._systems_by_tick_speed = {
+            self.FAST_TICK: [],
+            self.SLOW_TICK: {}
+        }
+        self.time_of_last_slow_tick = time.perf_counter()
         self.components = {}
         self._events = SimpleQueue()
         self._listeners = {}
@@ -51,7 +63,7 @@ class Engine:
                 self.components[c] = {}
             self.components[c][new_id] = v
 
-    def add_system(self, system, listening_to=None):
+    def add_system(self, system, listening_to=None, tick_wait=0):
         system._engine = self
         new_id = self._get_next_system_id()
         self._systems[new_id] = system
@@ -59,6 +71,14 @@ class Engine:
         if listening_to is not None:
             for event_type in listening_to:
                 self._add_listener(new_id, event_type)
+
+        if tick_wait == 0:
+            self._systems_by_tick_speed[self.FAST_TICK].append(new_id)
+        else:
+            self._systems_by_tick_speed[self.SLOW_TICK][new_id] = {
+                'tick_wait': tick_wait,
+                'ticks_since_last': 0
+            }
 
     def _add_listener(self, system_id, event_type):
         if event_type not in self._listeners:
@@ -88,8 +108,17 @@ class Engine:
         return return_comps
 
     def _run_systems(self):
-        for system in self._systems.values():
-            system.run()
+        for system_id in self._systems_by_tick_speed[self.FAST_TICK]:
+            self._systems[system_id].run()
+
+        cur_time = time.perf_counter()
+        if cur_time > self.time_of_last_slow_tick + self.SLOW_TICK_LENGTH:
+            self.time_of_last_slow_tick = cur_time
+            for system_id, tick_info in self._systems_by_tick_speed[self.SLOW_TICK].items():
+                tick_info['ticks_since_last'] += 1
+                if tick_info['ticks_since_last'] == tick_info['tick_wait']:
+                    self._systems[system_id].run()
+                    self._systems_by_tick_speed[self.SLOW_TICK][system_id]['ticks_since_last'] = 0
 
     def _handle_events(self):
         while not self._events.empty():
