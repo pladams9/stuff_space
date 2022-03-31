@@ -18,11 +18,11 @@ class CommandParser(System):
                 self._engine.fire_event(('GUI_OUTPUT', ('La dee da dee la dee da...', 'highlight')))
 
             if e[1] in ('print entities', 'pe'):
-                for entity in self._engine.get_matching_entities(['creature']):
+                for entity in self._engine.get_all_entities():
                     self._engine.fire_event((
                         'GUI_OUTPUT',
                         (
-                            str(self._engine.get_entity_components(entity)),
+                            f"{entity}: {self._engine.get_entity_components(entity)}",
                             'text'
                         )
                     ))

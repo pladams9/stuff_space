@@ -106,6 +106,15 @@ class Engine:
 
         return tuple(matching_entities)
 
+    def get_all_entities(self):
+        entities = []
+        for component in self.components.values():
+            for entity in component.keys():
+                if entity not in entities:
+                    entities.append(entity)
+
+        return tuple(entities)
+
     def get_entity_components(self, entity_id):
         return_comps = {}
         for component, entities in self.components.items():

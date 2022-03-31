@@ -20,3 +20,14 @@ def setup(engine):
         'age': r.randint(0, 10),
         'satiety': 0.5 + (r.random() * 0.5)
     })
+    engine.add_entity({
+        'name': 'Dani',
+        'creature': True,
+        'age': r.randint(0, 10),
+        'satiety': 0.5 + (r.random() * 0.5)
+    })
+    engine.add_entity({'food': True})
+    engine.add_entity({'food': True})
+    engine.add_entity({'food': True})
+    engine.add_entity({'food': True})
+    engine.add_entity({'food': True})

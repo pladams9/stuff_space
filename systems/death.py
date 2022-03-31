@@ -1,5 +1,4 @@
 from engine import System
-import random
 
 
 class DeathSystem(System):
@@ -9,8 +8,7 @@ class DeathSystem(System):
     def run(self):
         entities = self._engine.get_matching_entities(['creature'])
         for entity in entities:
-            death_chance = 1.0 - pow((1.0 / ((self._engine.components['age'][entity] / 100.0) + 1.0)), (1.0 / 365.0))
-            if random.random() < death_chance:
+            if self._engine.components['age'][entity] > 99 or self._engine.components['satiety'][entity] < 0.001:
                 self._engine.fire_event((
                     'GUI_OUTPUT',
                     (
