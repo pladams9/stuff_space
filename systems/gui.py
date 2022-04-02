@@ -8,9 +8,11 @@ class GUI(System):
     def __init__(self):
         super().__init__()
 
-        # Main Window
+        # Class Variables
         self._FRAME_LENGTH = 1.0 / 30.0
         self._time_of_last_frame = time.perf_counter()
+
+        # Main Window
         self._window = tk.Tk()
         self._window.geometry('800x400')
         self._window.grid_columnconfigure(0, weight=1)
