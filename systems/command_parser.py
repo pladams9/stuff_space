@@ -14,9 +14,6 @@ class CommandParser(System):
             if e[1] in ('shutdown', 'exit', 'quit'):
                 self._engine.fire_event(('SYSTEM_COMMAND', 'shutdown'))
 
-            if e[1] == 'sing a song':
-                self._engine.fire_event(('GUI_OUTPUT', ('La dee da dee la dee da...', 'highlight')))
-
             if e[1] in ('print entities', 'pe'):
                 for entity in self._engine.get_all_entities():
                     self._engine.fire_event((
