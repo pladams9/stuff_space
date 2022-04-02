@@ -1,4 +1,5 @@
 # IMPORTS
+from typing import Optional
 from queue import SimpleQueue
 import time
 
@@ -6,7 +7,7 @@ import time
 # CLASSES
 class System:
     def __init__(self):
-        self._engine = None
+        self._engine: Optional['Engine'] = None
         self.events = SimpleQueue()
 
     def run(self):
@@ -128,13 +129,13 @@ class Engine:
         for component in self.components:
             self.components[component].pop(entity_id, None)
 
-    def get_matching_entities(self, req_props):
-        for prop in req_props:
+    def get_matching_entities(self, *args):
+        for prop in args:
             if prop not in self.components:
                 return ()
 
-        matching_entities = self.components[req_props[0]].keys()
-        for prop in req_props[1:]:
+        matching_entities = self.components[args[0]].keys()
+        for prop in args[1:]:
             matching_entities = [entity for entity in matching_entities if entity in self.components[prop]]
 
         return tuple(matching_entities)

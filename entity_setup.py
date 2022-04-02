@@ -1,2 +1,5 @@
+import entities as ent
+
+
 def setup(engine):
-    pass
+    engine.add_entity(ent.creatures.dinosaur())
