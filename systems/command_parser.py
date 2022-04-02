@@ -1,4 +1,5 @@
 from engine import System
+from utils.pretty_dict_string import to_pretty_str
 
 
 class CommandParser(System):
@@ -9,22 +10,28 @@ class CommandParser(System):
         while not self.events.empty():
             e = self.events.get()
             self._engine.fire_event(('GUI_OUTPUT', ('> ' + e[1], 'command')))
+            # TODO: Print unsuccessful commands as invalid
 
             # Parse
+            # TODO: Break these out into separate functions?
+            # TODO: Use a dict to parcel out things?
+
             if e[1] in ('shutdown', 'exit', 'quit'):
                 self._engine.fire_event(('SYSTEM_COMMAND', 'shutdown'))
 
             if e[1] in ('print entities', 'pe'):
+                # TODO: Allow subsets of entities, e.g. 'print entities creature' or 'print entities location'
                 for entity in self._engine.get_all_entities():
                     self._engine.fire_event((
                         'GUI_OUTPUT',
                         (
-                            f"{entity}: {self._engine.get_entity_components(entity)}",
+                            f"{entity}:\n{to_pretty_str(self._engine.get_entity_components(entity), 4)}",
                             'text'
                         )
                     ))
 
             if e[1].startswith('set tick length '):
+                # TODO: make this work with different types of ticks
                 try:
                     new_tick_length = float(e[1][16:])
                     self._engine.fire_event(('SYSTEM_COMMAND', ('set_tick_length', new_tick_length)))
