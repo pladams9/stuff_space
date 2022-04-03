@@ -21,6 +21,10 @@ class System:
 
     def _handle_event(self, e):
         pass
+    
+    def _ec(self, entity: int, component: str):
+        """Get entity component"""
+        return self._engine.components[component][entity]
 
 
 class Engine:

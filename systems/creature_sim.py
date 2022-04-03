@@ -16,16 +16,16 @@ class CreatureSimulator(System):
 
         entities = self._engine.get_matching_entities('creature')
         for entity in entities:
-            if not self._engine.components['creature'][entity]['alive']:
+            if not self._ec(entity, 'creature')['alive']:
                 continue
 
             # Health
-            if self._engine.components['creature'][entity]['health'] <= 0.0:
-                self._engine.components['creature'][entity]['health'] = 0.0
-                self._engine.components['creature'][entity]['alive'] = False
+            if self._ec(entity, 'creature')['health'] <= 0.0:
+                self._ec(entity, 'creature')['health'] = 0.0
+                self._ec(entity, 'creature')['alive'] = False
                 self._engine.fire_event((
                     'GUI_OUTPUT',
-                    (f"{self._engine.components['name'][entity]} died.", 'text')
+                    (f"{self._ec(entity, 'name')} died.", 'text')
                 ))
                 # TODO: Separate strings into their own system?
                 # TODO: Maybe this is the History and StoryTelling systems. They receive events and store/output those events respectively.
@@ -33,5 +33,5 @@ class CreatureSimulator(System):
 
             # Aging
             if new_day:
-                self._engine.components['creature'][entity]['age'] += 1
+                self._ec(entity, 'creature')['age'] += 1
 

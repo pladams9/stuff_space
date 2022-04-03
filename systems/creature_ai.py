@@ -9,9 +9,9 @@ class CreatureAI(System):
     def run(self):
         entities = self._engine.get_matching_entities('creature')
         for entity in entities:
-            if not self._engine.components['creature'][entity]['alive']:
+            if not self._ec(entity, 'creature')['alive']:
                 continue
-            nearby = self._engine.components['nearby_entities'][entity]
+            nearby = self._ec(entity, 'nearby_entities')
             target = nearby[random.randint(0, len(nearby) - 1)]
 
             r = random.random()

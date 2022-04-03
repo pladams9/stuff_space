@@ -10,10 +10,10 @@ class CreatureInteraction(System):
     def _handle_event(self, e):
         # TODO: Break out this function into a separate module. One for every type of interaction. Have the modules register for the interaction type they want to handle.
         if e[1]['type'] == 'attack':
-            target_creature = self._engine.components['creature'][e[1]['target']]
+            target_creature = self._ec(e[1]['target'], 'creature')
             if target_creature['alive']:
-                self._engine.components['creature'][e[1]['target']]['health'] -= 0.1
+                self._ec(e[1]['target'], 'creature')['health'] -= 0.1
                 self._engine.fire_event((
                     'GUI_OUTPUT',
-                    (f"{self._engine.components['name'][e[1]['primary']]} attacked {self._engine.components['name'][e[1]['target']]}!", 'text')
+                    (f"{self._ec(e[1]['primary'], 'name')} attacked {self._ec(e[1]['target'], 'name')}!", 'text')
                 ))

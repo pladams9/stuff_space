@@ -12,6 +12,6 @@ class LocationSystem(System):
         for entity in self._engine.get_matching_entities('location', 'nearby_entities'):
             self._engine.components['nearby_entities'][entity] = []
             for second_entity in ent_with_locations:
-                if self._engine.components['location'][entity] == self._engine.components['location'][second_entity]\
+                if self._ec(entity, 'location') == self._ec(second_entity, 'location')\
                         and entity != second_entity:
                     self._engine.components['nearby_entities'][entity].append(second_entity)
