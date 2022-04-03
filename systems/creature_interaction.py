@@ -1,4 +1,5 @@
 from engine import System
+from systems.creature_interactions import interaction_handlers as ih
 
 
 class CreatureInteraction(System):
@@ -8,12 +9,5 @@ class CreatureInteraction(System):
         super().__init__()
 
     def _handle_event(self, e):
-        # TODO: Break out this function into a separate module. One for every type of interaction. Have the modules register for the interaction type they want to handle.
-        if e[1]['type'] == 'attack':
-            target_creature = self._ec(e[1]['target'], 'creature')
-            if target_creature['alive']:
-                self._ec(e[1]['target'], 'creature')['health'] -= 0.1
-                self._engine.fire_event((
-                    'GUI_OUTPUT',
-                    (f"{self._ec(e[1]['primary'], 'name')} attacked {self._ec(e[1]['target'], 'name')}!", 'text')
-                ))
+        if e[1]['type'] in ih.INTERACTION_HANDLERS:
+            ih.INTERACTION_HANDLERS[e[1]['type']](self, e)
