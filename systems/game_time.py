@@ -45,12 +45,3 @@ class GameTimeSystem(System):
             self._engine.fire_event(('TIME_NEW_DAY', time_summary))
         if new_year:
             self._engine.fire_event(('TIME_NEW_YEAR', time_summary))
-
-    def time_of_day(self):
-        seconds_since_epoch = int(self._seconds_since_epoch)
-        seconds = seconds_since_epoch % 60
-        minutes_since_epoch = (seconds_since_epoch - seconds) // 60
-        minutes = minutes_since_epoch % 60
-        hours_since_epoch = (minutes_since_epoch - minutes) // 60
-        hours = hours_since_epoch % 24
-        return hours, minutes, seconds
