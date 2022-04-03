@@ -3,6 +3,8 @@ from utils.pretty_dict_string import to_pretty_str
 
 
 class CommandParser(System):
+    LISTENERS = ['GUI_INPUT']
+
     def __init__(self):
         super().__init__()
 

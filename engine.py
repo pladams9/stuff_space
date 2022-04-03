@@ -6,11 +6,20 @@ import time
 
 # CLASSES
 class System:
+    LISTENERS = None
+
     def __init__(self):
         self._engine: Optional['Engine'] = None
         self.events = SimpleQueue()
 
     def run(self):
+        self._handle_events()  # A derived System could override just _handle_event if desired
+
+    def _handle_events(self):
+        while not self.events.empty():
+            self._handle_event(self.events.get())
+
+    def _handle_event(self, e):
         pass
 
 
@@ -94,13 +103,15 @@ class Engine:
     def shutdown(self):
         self._running = False
 
-    def add_system(self, system, tick_type, listening_to=None):
+    def add_system(self, system_class, tick_type, *args, **kwargs):
+        system = system_class(*args, **kwargs)
         system._engine = self
+
         new_id = self._get_next_system_id()
         self._systems[new_id] = system
 
-        if listening_to is not None:
-            for event_type in listening_to:
+        if system.LISTENERS is not None:
+            for event_type in system.LISTENERS:
                 self._add_listener(new_id, event_type)
 
         if tick_type == Engine.EVERY_TICK:

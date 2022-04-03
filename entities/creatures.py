@@ -1,12 +1,14 @@
-def dinosaur():
+import random
+
+
+def dinosaur(location=0):
     return {
-        'name': 'Bob the Dinosaur',
+        'name': ('Bob the Brontosaurus', 'Alice the Velociraptor', 'Charlie the T-Rex')[random.randint(0, 2)],
         'creature': {
+            'alive': True,
             'age': 0.0,
             'health': 1.0
         },
-        'location': 'on the ship'
+        'location': location,
+        'nearby_entities': []
     }
-
-    # TODO: Create creature simulator system
-    # TODO: Create location system (replace 'on the ship' with something more precise)

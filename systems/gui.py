@@ -5,6 +5,8 @@ import time
 
 
 class GUI(System):
+    LISTENERS = ['GUI_OUTPUT']
+
     def __init__(self):
         super().__init__()
 
@@ -103,7 +105,7 @@ class GUI(System):
             self._window.update()  # Processes all outstanding events on this tick
 
     def _submit_cmd(self, _e):
-        self._engine.fire_event(('GUI_COMMAND', self._cmd_line.get()))
+        self._engine.fire_event(('GUI_INPUT', self._cmd_line.get()))
 
         if len(self._cmd_line_history) == 0 or self._cmd_line.get() != self._cmd_line_history[0]:
             self._cmd_line_history.insert(0, self._cmd_line.get())
