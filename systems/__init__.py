@@ -1,3 +1,8 @@
-import utils.importer as i
-
-i.import_all_modules(__name__, __file__)
+from . import gui
+from . import command_parser
+from . import game_time
+from . import clock_sys
+from . import location
+from . import creature_sim
+from . import creature_ai
+from . import creature_interaction

@@ -21,7 +21,3 @@ def setup(engine):
 
     # Interaction Systems
     engine.add_system(creature_interaction.CreatureInteraction, engine.LOGIC_TICK)
-
-
-# TODO: Create CreatureAI system
-# TODO: Create LocationSystem

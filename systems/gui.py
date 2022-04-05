@@ -10,10 +10,6 @@ class GUI(System):
     def __init__(self):
         super().__init__()
 
-        # Class Variables
-        self._FRAME_LENGTH = 1.0 / 30.0
-        self._time_of_last_frame = time.perf_counter()
-
         # Main Window
         self._window = tk.Tk()
         self._window.geometry('800x400')
@@ -37,6 +33,8 @@ class GUI(System):
             wrap='word'
         )
         self._terminal.grid(column=0, row=0, sticky='nesw')
+
+        # Terminal Text Tags
         self._terminal.tag_configure('text', foreground='#AAA')
         self._terminal.tag_configure('highlight', foreground="#67F")
         self._terminal.tag_configure('command', foreground='#FFF')
@@ -87,22 +85,19 @@ class GUI(System):
         self._terminal.bind("<Key>", terminal_type)
 
     def run(self):
-        cur_time = time.perf_counter()
-        if cur_time > self._time_of_last_frame + self._FRAME_LENGTH:
-            self._time_of_last_frame = cur_time
+        cur_scroll_end = self._terminal.yview()[1]
 
-            cur_scroll_end = self._terminal.yview()[1]
+        self._handle_events()
 
-            while not self.events.empty():
-                e = self.events.get()
-                if e[0] == 'GUI_OUTPUT':
-                    self._terminal.insert('end', e[1][0], e[1][1])
-                    self._terminal.insert('end', '\n')
+        if cur_scroll_end == 1.0:
+            self._terminal.yview_moveto(1.0)
 
-            if cur_scroll_end == 1.0:
-                self._terminal.yview_moveto(1.0)
+        self._window.update()  # Processes all outstanding events on this tick
 
-            self._window.update()  # Processes all outstanding events on this tick
+    def _handle_event(self, e):
+        if e[0] == 'GUI_OUTPUT':
+            self._terminal.insert('end', e[1][0], e[1][1])
+            self._terminal.insert('end', '\n')
 
     def _submit_cmd(self, _e):
         self._engine.fire_event(('GUI_INPUT', self._cmd_line.get()))

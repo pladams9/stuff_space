@@ -1,3 +1,3 @@
-import utils.importer as i
+import utils.plugin_importer as i
 
-i.import_all_modules(__name__, __file__)
+i.import_plugins(__name__, __file__)
