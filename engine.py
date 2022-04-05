@@ -1,33 +1,51 @@
 # IMPORTS
+from typing import Optional
 from queue import SimpleQueue
 import time
 
 
 # CLASSES
 class System:
+    LISTENERS = None
+
     def __init__(self):
-        self._engine = None
+        self._engine: Optional['Engine'] = None
         self.events = SimpleQueue()
 
     def run(self):
+        self._handle_events()  # A derived System could override just _handle_event if desired
+
+    def _handle_events(self):
+        while not self.events.empty():
+            self._handle_event(self.events.get())
+
+    def _handle_event(self, e):
         pass
+    
+    def _ec(self, entity: int, component: str):
+        """
+        Get entity component
+        """
+        return self._engine.components[component][entity]
 
 
 class Engine:
-    def __init__(self):
-        self.FAST_TICK = 1
-        self.SLOW_TICK = 2
-        self.SLOW_TICK_LENGTH = 1.0 / 30.0
-            # TODO: Get rid of this slow tick and just let systems all determine their time per second?
-            # TODO: Or don't remove it because we want to couple logic on a single time step?
-            # TODO: Perhaps we should just redefine some ticks: EVERY_TICK, LOGIC_TICK, GUI_TICK
+    EVERY_TICK = 1
+    LOGIC_TICK = 2
+    LOGIC_TICK_LENGTH = 1.0 / 30.0
+    GUI_TICK = 3
+    GUI_TICK_LENGTH = 1.0 / 30.0
 
+    def __init__(self):
         self._systems = {}
         self._systems_by_tick_speed = {
-            self.FAST_TICK: [],
-            self.SLOW_TICK: {}
+            self.EVERY_TICK: [],
+            self.LOGIC_TICK: [],
+            self.GUI_TICK: []
         }
-        self.time_of_last_slow_tick = time.perf_counter()
+        self.time_of_last_logic_tick = time.perf_counter()
+        self.time_of_last_gui_tick = time.perf_counter()
+
         self.components = {}
         self._events = SimpleQueue()
         self._listeners = {}
@@ -56,8 +74,66 @@ class Engine:
         self._running = True
         self.mainloop()
 
+    def _run_systems(self):
+        for system_id in self._systems_by_tick_speed[self.EVERY_TICK]:
+            self._systems[system_id].run()
+
+        cur_time = time.perf_counter()
+        if cur_time > self.time_of_last_logic_tick + self.LOGIC_TICK_LENGTH:
+            self.time_of_last_logic_tick = cur_time
+            for system_id in self._systems_by_tick_speed[self.LOGIC_TICK]:
+                self._systems[system_id].run()
+
+        if cur_time > self.time_of_last_gui_tick + self.GUI_TICK_LENGTH:
+            self.time_of_last_gui_tick = cur_time
+            for system_id in self._systems_by_tick_speed[self.GUI_TICK]:
+                self._systems[system_id].run()
+
+    def _handle_events(self):
+        while not self._events.empty():
+            e = self._events.get()
+
+            if e[0] == 'SYSTEM_COMMAND':
+                self._handle_system_command(e)
+
+            if e[0] in self._listeners:
+                for listener in self._listeners[e[0]]:
+                    self._systems[listener].events.put(e)
+
+    def _handle_system_command(self, e):
+        if e[1] == 'shutdown':
+            self.shutdown()
+        elif e[1][0] == 'set_tick_length':
+            self.LOGIC_TICK_LENGTH = e[1][1]
+
     def shutdown(self):
         self._running = False
+
+    def add_system(self, system_class, tick_type, *args, **kwargs):
+        system = system_class(*args, **kwargs)
+        system._engine = self
+
+        new_id = self._get_next_system_id()
+        self._systems[new_id] = system
+
+        if system.LISTENERS is not None:
+            for event_type in system.LISTENERS:
+                self._add_listener(new_id, event_type)
+
+        if tick_type == Engine.EVERY_TICK:
+            self._systems_by_tick_speed[self.EVERY_TICK].append(new_id)
+        elif tick_type == Engine.LOGIC_TICK:
+            self._systems_by_tick_speed[self.LOGIC_TICK].append(new_id)
+        elif tick_type == Engine.GUI_TICK:
+            self._systems_by_tick_speed[self.GUI_TICK].append(new_id)
+
+    def _add_listener(self, system_id, event_type):
+        if event_type not in self._listeners:
+            self._listeners[event_type] = []
+        self._listeners[event_type].append(system_id)
+
+    def fire_event(self, event=('NullEventType', 'NoData')):
+        self._events.put(event)
 
     def add_entity(self, components):
         new_id = self._get_next_entity_id()
@@ -70,38 +146,13 @@ class Engine:
         for component in self.components:
             self.components[component].pop(entity_id, None)
 
-    def add_system(self, system, listening_to=None, tick_wait=0):
-        system._engine = self
-        new_id = self._get_next_system_id()
-        self._systems[new_id] = system
-
-        if listening_to is not None:
-            for event_type in listening_to:
-                self._add_listener(new_id, event_type)
-
-        if tick_wait == 0:
-            self._systems_by_tick_speed[self.FAST_TICK].append(new_id)
-        else:
-            self._systems_by_tick_speed[self.SLOW_TICK][new_id] = {
-                'tick_wait': tick_wait,
-                'ticks_since_last': 0
-            }
-
-    def _add_listener(self, system_id, event_type):
-        if event_type not in self._listeners:
-            self._listeners[event_type] = []
-        self._listeners[event_type].append(system_id)
-
-    def fire_event(self, event=('NullEventType', 'NoData')):
-        self._events.put(event)
-
-    def get_matching_entities(self, req_props):
-        for prop in req_props:
+    def get_matching_entities(self, *args):
+        for prop in args:
             if prop not in self.components:
                 return ()
 
-        matching_entities = self.components[req_props[0]].keys()
-        for prop in req_props[1:]:
+        matching_entities = self.components[args[0]].keys()
+        for prop in args[1:]:
             matching_entities = [entity for entity in matching_entities if entity in self.components[prop]]
 
         return tuple(matching_entities)
@@ -122,33 +173,3 @@ class Engine:
                 return_comps[component] = self.components[component][entity_id]
 
         return return_comps
-
-    def _run_systems(self):
-        for system_id in self._systems_by_tick_speed[self.FAST_TICK]:
-            self._systems[system_id].run()
-
-        cur_time = time.perf_counter()
-        if cur_time > self.time_of_last_slow_tick + self.SLOW_TICK_LENGTH:
-            self.time_of_last_slow_tick = cur_time
-            for system_id, tick_info in self._systems_by_tick_speed[self.SLOW_TICK].items():
-                tick_info['ticks_since_last'] += 1
-                if tick_info['ticks_since_last'] == tick_info['tick_wait']:
-                    self._systems[system_id].run()
-                    self._systems_by_tick_speed[self.SLOW_TICK][system_id]['ticks_since_last'] = 0
-
-    def _handle_events(self):
-        while not self._events.empty():
-            e = self._events.get()
-
-            if e[0] == 'SYSTEM_COMMAND':
-                self._handle_system_command(e)
-
-            if e[0] in self._listeners:
-                for listener in self._listeners[e[0]]:
-                    self._systems[listener].events.put(e)
-
-    def _handle_system_command(self, e):
-        if e[1] == 'shutdown':
-            self.shutdown()
-        elif e[1][0] == 'set_tick_length':
-            self.SLOW_TICK_LENGTH = e[1][1]

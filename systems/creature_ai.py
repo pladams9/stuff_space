@@ -1,21 +1,27 @@
 from engine import System
+import random
 
 
-class CreatureAISystem(System):
+class CreatureAI(System):
     def __init__(self):
         super().__init__()
 
     def run(self):
-        creatures = self._engine.get_matching_entities(['creature', 'satiety'])
-        for creature in creatures:
-            food = self._engine.get_matching_entities(['food'])
-            if self._engine.components['satiety'][creature] <= 0.5 and len(food) > 0:
-                self._engine.components['satiety'][creature] += 0.25
-                self._engine.remove_entity(food[0])
+        entities = self._engine.get_matching_entities('creature')
+        for entity in entities:
+            if not self._ec(entity, 'creature')['alive']:
+                continue
+            nearby = self._ec(entity, 'nearby_entities')
+            target = nearby[random.randint(0, len(nearby) - 1)]
+
+            r = random.random()
+            if r < 0.1:
+                # Dinosaur tries to attack
                 self._engine.fire_event((
-                    'GUI_OUTPUT',
-                    (
-                        f"{self._engine.components['name'][creature]} ate some food.",
-                        'text'
-                    )
+                    'CREATURE_INTERACTION',
+                    {
+                        'type': 'attack',
+                        'primary': entity,
+                        'target': target
+                    }
                 ))

@@ -1,17 +1,23 @@
-from systems.gui import GUI
-from systems.command_parser import CommandParser
-from systems.aging import AgingSystem
-from systems.hunger import HungerSystem
-from systems.death import DeathSystem
-from systems.manna import MannaSystem
-from systems.creature_ai import CreatureAISystem
+from systems import *
 
 
 def setup(engine):
-    engine.add_system(GUI(), ['GUI_OUTPUT'])
-    engine.add_system(CommandParser(), ['GUI_COMMAND'])
-    engine.add_system(AgingSystem(), tick_wait=300)
-    engine.add_system(HungerSystem(), tick_wait=30)
-    engine.add_system(DeathSystem(), tick_wait=30)
-    engine.add_system(MannaSystem(), tick_wait=30)
-    engine.add_system(CreatureAISystem(), tick_wait=30)
+    # GUI
+    engine.add_system(gui.GUI, engine.GUI_TICK)
+    engine.add_system(command_parser.CommandParser, engine.LOGIC_TICK)
+
+    # Timing
+    engine.add_system(game_time.GameTimeSystem, engine.LOGIC_TICK)
+    engine.add_system(clock_sys.ClockSystem, engine.LOGIC_TICK)
+
+    # Support Systems
+    engine.add_system(location.LocationSystem, engine.LOGIC_TICK)
+
+    # Simulation Systems
+    engine.add_system(creature_sim.CreatureSimulator, engine.LOGIC_TICK)
+
+    # AI Systems
+    engine.add_system(creature_ai.CreatureAI, engine.LOGIC_TICK)
+
+    # Interaction Systems
+    engine.add_system(creature_interaction.CreatureInteraction, engine.LOGIC_TICK)
