@@ -1,3 +1,3 @@
-from . import interaction_handlers
+import utils.importer as i
 
-from . import attack
+i.import_all_modules(__name__, __file__)

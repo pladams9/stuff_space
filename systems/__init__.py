@@ -1,10 +1,3 @@
-from . import gui
-from . import command_parser
+import utils.importer as i
 
-from . import game_time
-from . import clock_sys
-from . import location
-
-from . import creature_sim
-from . import creature_ai
-from . import creature_interaction
+i.import_all_modules(__name__, __file__)
