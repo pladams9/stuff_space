@@ -13,8 +13,7 @@ class CommandParser(System):
         # TODO: Print unsuccessful commands as invalid
 
         # Parse
-        # TODO: Break these out into separate functions?
-        # TODO: Use a dict to parcel out things?
+        # TODO: Break these out into separate functions? Use a dict to parcel out things?
 
         if e[1] in ('shutdown', 'exit', 'quit'):
             self._engine.fire_event(('SYSTEM_COMMAND', 'shutdown'))
