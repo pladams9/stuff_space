@@ -28,8 +28,8 @@ class CreatureSimulator(System):
                     (f"{self._ec(entity, 'name')} died.", 'text')
                 ))
                 # TODO: Separate strings into their own system?
-                #   Maybe this is the History and StoryTelling systems. They receive events and store/output those
-                #   events respectively. So we need an event for the death.
+                # TODO: Maybe this is the History and StoryTelling systems. They receive events and store/output those events respectively.
+                # TODO: So we need an event for the death.
 
             # Aging
             if new_day:
