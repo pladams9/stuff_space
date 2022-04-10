@@ -5,6 +5,30 @@ class LocationSystem(System):
     def __init__(self):
         super().__init__()
 
+        # TODO: Externalize room generation
+        self._rooms = {
+            0: {
+                'name': 'Bridge',
+                'exits': [1]
+            },
+            1: {
+                'name': 'Hallway',
+                'exits': [1, 2, 3, 4]
+            },
+            2: {
+                'name': 'Engine Room',
+                'exits': [1]
+            },
+            3: {
+                'name': 'Quarters',
+                'exits': [1, 4]
+            },
+            4: {
+                'name': 'Lounge',
+                'exits': [1, 3]
+            }
+        }
+
     def run(self):
         ent_with_locations = self._engine.get_matching_entities('location')
 
