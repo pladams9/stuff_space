@@ -9,6 +9,9 @@ def dinosaur(location=0):
             'age': 0.0,
             'health': 1.0
         },
-        'location': location,
+        'location': {
+            'room_id': location,
+            'exits': []
+        },
         'nearby_entities': []
     }

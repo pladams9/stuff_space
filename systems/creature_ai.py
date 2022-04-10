@@ -11,17 +11,28 @@ class CreatureAI(System):
         for entity in entities:
             if not self._ec(entity, 'creature')['alive']:
                 continue
-            nearby = self._ec(entity, 'nearby_entities')
-            target = nearby[random.randint(0, len(nearby) - 1)]
 
-            r = random.random()
-            if r < 0.1:
-                # Dinosaur tries to attack
-                self._engine.fire_event((
-                    'CREATURE_INTERACTION',
-                    {
-                        'type': 'attack',
-                        'primary': entity,
-                        'target': target
-                    }
-                ))
+            if random.random() < 0.1:
+                if random.random() < 0.5:
+                    exits = self._ec(entity, 'location')['exits']
+                    if len(exits) > 0:
+                        destination = exits[random.randint(0, len(exits) - 1)]
+                        self._engine.fire_event((
+                            'LOCATION_MOVE',
+                            {
+                                'entity': entity,
+                                'destination': destination
+                            }
+                        ))
+                else:
+                    nearby = self._ec(entity, 'nearby_entities')
+                    if len(nearby) > 0:
+                        target = nearby[random.randint(0, len(nearby) - 1)]
+                        self._engine.fire_event((
+                            'CREATURE_INTERACTION',
+                            {
+                                'type': 'attack',
+                                'primary': entity,
+                                'target': target
+                            }
+                        ))
