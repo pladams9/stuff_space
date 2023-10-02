@@ -9,8 +9,11 @@ class CreatureAI(System):
     def run(self):
         entities = self._engine.get_matching_entities('creature')
         for entity in entities:
-            if not self._ec(entity, 'creature')['alive']:
+            if not self._ec(entity, 'creature')['alive']:  # TODO: Make 'alive' a separate component?
                 continue
+
+            # TODO: Add some sort of cooldown for actions? Actions should take up time.
+            # TODO: Abstract the AI stuff more
 
             if random.random() < 0.1:
                 if random.random() < 0.5:

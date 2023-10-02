@@ -10,7 +10,7 @@ def setup(engine):
     engine.add_system(game_time.GameTimeSystem, engine.LOGIC_TICK)
     engine.add_system(clock_sys.ClockSystem, engine.LOGIC_TICK)
 
-    # Support Systems
+    # Component Update Systems
     engine.add_system(location.LocationSystem, engine.LOGIC_TICK)
 
     # Simulation Systems
